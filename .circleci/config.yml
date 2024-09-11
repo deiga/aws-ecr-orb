@@ -30,6 +30,11 @@ jobs:
           profile_name: "default" 
           role_session_name: ecr-orb-test-session-buildx
           region: "us-west-2"
+      - aws-ecr/ecr_login:
+          profile_name: default
+          region: "us-west-2"
+          account_id: "122211685980"
+          use_credentials_helper: true
       - aws-ecr/build_image:
           repo: << parameters.repo >>
           tag: << parameters.tag >>
