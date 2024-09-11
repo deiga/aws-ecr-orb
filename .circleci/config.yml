@@ -13,18 +13,12 @@ jobs:
     machine:
       image: ubuntu-2204:current
     parameters:
-      workspace_root:
-        type: string
       repo:
         type: string
       tag:
         type: string
       dockerfile:
         type: string
-      path:
-        type: string
-      push_image:
-        type: boolean
       platform:
         type: string
       region:
@@ -40,20 +34,16 @@ jobs:
           repo: << parameters.repo >>
           tag: << parameters.tag >>
           dockerfile: << parameters.dockerfile >>
-          path: << parameters.path >>
           platform: << parameters.platform >>
           push_image: true
 workflows:
   lint-pack:
     jobs:
       - build-test-then-push-with-buildx:
-          workspace_root: workspace
           repo: aws-ecr-orb-tempora-test
           context: [CPE-OIDC]
           tag: temporal-test
           dockerfile: sample/Dockerfile
-          path: sample
-          push_image: false
           platform: linux/amd64
           region: us-west-2
           filters: *filters
