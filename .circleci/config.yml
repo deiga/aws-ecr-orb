@@ -9,15 +9,6 @@ filters: &filters
   tags:
     only: /.*/
 jobs:
-  pre-integration-checkout-workspace-job:
-    docker:
-      - image: cimg/base:current
-    resource_class: small
-    steps:
-      - checkout
-      - persist_to_workspace:
-          root: .
-          paths: [sample/Dockerfile]
   build-test-then-push-with-buildx:
     machine:
       image: ubuntu-2204:current
@@ -39,6 +30,7 @@ jobs:
       region:
         type: string
     steps:
+      - checkout
       - aws-cli/setup:
           role_arn: arn:aws:iam::122211685980:role/CPE_ECR_OIDC_TEST
           profile_name: "default" 
@@ -54,19 +46,17 @@ jobs:
 workflows:
   lint-pack:
     jobs:
-      - pre-integration-checkout-workspace-job
       - build-test-then-push-with-buildx:
           workspace_root: workspace
           repo: aws-ecr-orb-tempora-test
           context: [CPE-OIDC]
           tag: temporal-test
           dockerfile: sample/Dockerfile
-          path: workspace
+          path: sample
           push_image: false
           platform: linux/amd64
           region: us-west-2
           filters: *filters
-          requires: [pre-integration-checkout-workspace-job]
       - orb-tools/lint:
           filters: *filters
       - orb-tools/pack:
@@ -76,9 +66,9 @@ workflows:
       - shellcheck/check:
           filters: *filters
       # Triggers the next workflow in the Orb Development Kit.
-      - orb-tools/continue:
-          orb_name: aws-ecr
-          pipeline_number: << pipeline.number >>
-          vcs_type: << pipeline.project.type >>
-          requires: [orb-tools/lint, orb-tools/review, orb-tools/pack, shellcheck/check]
-          filters: *filters
+      # - orb-tools/continue:
+      #     orb_name: aws-ecr
+      #     pipeline_number: << pipeline.number >>
+      #     vcs_type: << pipeline.project.type >>
+      #     requires: [orb-tools/lint, orb-tools/review, orb-tools/pack, shellcheck/check, ]
+      #     filters: *filters
